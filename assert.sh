@@ -75,7 +75,7 @@ assert_end() {
     tests_endtime="$(date +%s%N)"
     # required visible decimal place for seconds (leading zeros if needed)
     local tests_time="$( \
-        printf "%010d" "$(( ${tests_endtime/%N/000000000} 
+        printf "%010d" "$(( ${tests_endtime/%N/000000000}
                             - ${tests_starttime/%N/000000000} ))")"  # in ns
     tests="$tests_ran ${*:+$* }tests"
     [[ -n "$DISCOVERONLY" ]] && echo "collected $tests." && _assert_reset && return
@@ -94,6 +94,8 @@ assert_end() {
         echo "$tests_failed of $tests failed$report_time."
     fi
     tests_failed_previous=$tests_failed
+    tests_ran_total=$(($tests_ran_total + $tests_ran))
+    tests_failed_total=$(($tests_failed_total + $tests_failed))
     [[ $tests_failed -gt 0 ]] && tests_suite_status=1
     _assert_reset
 }
@@ -103,7 +105,7 @@ assert() {
     (( tests_ran++ )) || :
     [[ -z "$DISCOVERONLY" ]] || return
     expected=$(echo -ne "${2:-}")
-    result="$(eval 2>/dev/null $1 <<< ${3:-})" || true
+    result="$(eval 2>/dev/null "$1" <<< ${3:-})" || true
     if [[ "$result" == "$expected" ]]; then
         [[ -z "$DEBUG" ]] || echo -n .
         return
@@ -119,7 +121,7 @@ assert_raises() {
     (( tests_ran++ )) || :
     [[ -z "$DISCOVERONLY" ]] || return
     status=0
-    (eval $1 <<< ${3:-}) > /dev/null 2>&1 || status=$?
+    (eval "$1" <<< ${3:-}) > /dev/null 2>&1 || status=$?
     expected=${2:-0}
     if [[ "$status" -eq "$expected" ]]; then
         [[ -z "$DEBUG" ]] || echo -n .
@@ -139,6 +141,7 @@ _assert_fail() {
     fi
     tests_errors[$tests_failed]="$report"
     (( tests_failed++ )) || :
+    return 1
 }
 
 skip_if() {
@@ -178,9 +181,88 @@ _skip() {
 
 _assert_reset
 : ${tests_suite_status:=0}  # remember if any of the tests failed so far
+: ${tests_ran_total:=0}     # remember the total number of tests ran (inc. failures)
+: ${tests_failed_total:=0}  # remember the total number of test failures
 _assert_cleanup() {
     local status=$?
     # modify exit code if it's not already non-zero
     [[ $status -eq 0 && -z $CONTINUE ]] && exit $tests_suite_status
 }
 trap _assert_cleanup EXIT
+
+
+# assert-extras.sh 1.1 - supplementary bash unit testing functions
+# Note: This script should be sourced together with assert.sh,
+#       it is dependent on the functionality provided by that script.
+
+# assert_success <command> [stdin]
+assert_success() {
+	assert_raises "$1" 0 "${2:-}"
+}
+
+# assert_failure <command> [stdin]
+assert_failure() {
+    (( tests_ran++ )) || :
+    [[ -z "$DISCOVERONLY" ]] || return
+    status=0
+    (eval "$1" <<< ${2:-}) > /dev/null 2>&1 || status=$?
+    if [[ "$status" != "0" ]]; then
+        [[ -z "$DEBUG" ]] || echo -n .
+        return
+    fi
+    _assert_fail "program terminated with a zero return code; expecting non-zero return code" \
+    	"$1" "$2"
+}
+
+# assert_contains <command> <expected output...>
+assert_contains() {
+	_assert_with_grep '-F' "$@"
+}
+
+# assert_matches <command> <expected output...>
+assert_matches() {
+	_assert_with_grep '-E' "$@"
+}
+
+# assert_startswith <command> <expected start to stdout>
+assert_startswith() {
+	assert_success "[[ '$($1)' == '$2'* ]]"
+}
+
+# assert_endswith <command> <expected start to stdout>
+assert_endswith() {
+	assert_success "[[ '$($1)' == *'$2' ]]"
+}
+
+# _assert_with_grep <grep modifiers> <command> <expected output...>
+_assert_with_grep() {
+    local grep_modifier="$1"
+    local output="$($2)"
+    shift 2
+
+    while [ $# != 0 ]; do
+    	assert_raises "echo '$output' | $GREP $grep_modifier '$1'" 0 || return 1
+    	shift
+    done
+}
+
+# Returns the resolved command, preferring any gnu-versions of the cmd (prefixed with 'g') on
+# non-Linux systems such as Mac OS, and falling back to the standard version if not.
+_cmd() {
+	local cmd="$1"
+
+
+	local gnu_cmd="g$cmd"
+	local gnu_cmd_found=$(which "$gnu_cmd" 2> /dev/null)
+	if [ "$gnu_cmd_found" ]; then
+		echo "$gnu_cmd_found"
+	else
+		if [ "$(uname)" == 'Darwin' ]; then
+			echo "Warning: Cannot find gnu version of command '$cmd' ($gnu_cmd) on path." \
+			     "Falling back to standard command" >&2
+		fi
+		echo "$cmd"
+	fi
+}
+
+GREP=$(_cmd grep)

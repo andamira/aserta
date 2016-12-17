@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 . assert.sh
 
 assert "echo"                           # no output expected
@@ -60,7 +58,7 @@ assert "_clean; skip_if false; assert_raises true; assert_end;" \
 assert "_clean; skip_if bash -c 'exit 1'; assert_raises false; assert_end;" \
 "all 0 tests passed."
 # subshells and pipes can be used in skip as well (albeit escaped)
-assert "_clean; skip_if 'cat /etc/passwd | grep \$(echo \$USER)';
+assert "_clean; skip_if 'id | grep \$(echo \$USER)';
 assert_raises false; assert_end;" \
 "all 0 tests passed."
 assert_end output
@@ -96,8 +94,9 @@ assert "_clean; x=0; assert 'x=1'; assert_raises 'x=2'; echo \$x" 0
 assert "_clean; x=0; assert 'export x=1'; assert_raises 'export x=2';
 echo \$x" 0
 # options do not leak
-assert_raises "set +e"
-assert_raises "shopt -o errexit"
+assert_raises "shopt -o errexit" 1
+assert_raises "set -e"
+assert_raises "shopt -o errexit" 1
 # skip properly resets all options
 assert_raises "_clean; set +e; skip; assert_raises false; shopt -o errexit" 1
 assert_raises "_clean; set -e; skip; assert_raises false; shopt -o errexit"
@@ -153,7 +152,8 @@ _date=22;
 assert_end" "all 1 tests passed in 2.000s."
 # commit: supported formatting codes
 assert "echo %s" "%s"
-assert "echo -n %s | wc -c" "2"
+# We trim the output from wc as the BSD version (on Mac OS) contains leading spaces
+assert "echo -n %s | wc -c | tr -d '[[:space:]]'" "2"
 # date with no nanosecond support
 date() {         # date mock
     echo "123N"
@@ -161,4 +161,132 @@ date() {         # date mock
 assert '_clean DEBUG=1 INVARIANT=; tests_starttime="0N"; assert_end' \
        '\nall 0 tests passed in 123.000s.'
 unset -f date  # bring back original date
+# commit: Supporting multiline inputs
+# We trim the output from wc as the BSD version (on Mac OS) contains leading spaces
+assert 'echo "this
+is a multiline echo" | wc -l | tr -d "[[:space:]]"' "2"
+assert 'echo -e "this\nis a multiline echo" | wc -l | tr -d "[[:space:]]"' "2"
 assert_end regression
+
+
+
+### assert-extras.sh
+
+
+assert "echo foo" "foo"
+assert_raises "true" 0
+assert_raises "exit 127" 127
+
+assert_end sanity
+
+###
+### assert_success tests
+###
+
+# Tests expecting success
+assert_success "true"
+assert_success "echo foo"
+assert_success "cat" "foo"
+
+# Tests expecting failure
+assert_raises 'assert_success "false"' 1
+assert_raises 'assert_success "exit 1"' 1
+
+assert_end assert_success
+
+###
+### assert_failure tests
+###
+
+# Tests expecting success
+assert_failure "false"
+assert_failure "exit 1"
+assert_failure "exit -1"
+assert_failure "exit 42"
+assert_failure "exit -42"
+
+# Tests expecting failure
+assert_raises 'assert_failure "true"' 1
+assert_raises 'assert_failure "echo foo"' 1
+
+assert_end assert_failure
+
+###
+### assert_contains tests
+###
+
+# Tests expecting success
+assert_contains "echo foo" "foo"
+assert_contains "echo foobar" "foo"
+assert_contains "echo foo bar" "foo"
+assert_contains "echo foo bar" "bar"
+assert_contains "echo foo bar" "foo bar"
+
+# Tests expecting failure
+assert_failure 'assert_contains "echo foo" "foot"'
+assert_failure 'assert_contains "echo foo" "f.."'
+
+# Multi-word argument tests
+assert_contains "echo foo bar" "foo bar"
+assert_failure 'assert_contains "echo foo; echo bar" "foo bar"'
+
+# Multi-argument tests
+assert_contains "echo foo bar baz" "foo" "baz"
+assert_failure 'assert_contains "echo foo bar baz" "bar" "foo baz"'
+
+assert_end assert_contains
+
+###
+### assert_matches tests
+###
+
+# Tests expecting success
+assert_matches "echo foo" "f.."
+assert_matches "echo foobar" "f."
+assert_matches "echo foo bar" "^foo bar$"
+assert_matches "echo foo bar" "[az ]+"
+
+# Tests expecting failure
+assert_failure 'assert_matches "echo foot" "foo$"'
+
+# Multi-word argument tests
+assert_matches "echo foo bar" "foo .*"
+assert_failure 'assert_matches "echo foo; echo bar" "foo .*"'
+
+# Multi-argument tests
+assert_matches "echo foo bar baz" "^f.." "baz$"
+assert_failure 'assert_matches "echo foo bar baz" "bar" "foo baz"'
+
+assert_end assert_matches
+
+###
+### assert_startswith tests
+###
+
+# Tests expecting success
+assert_startswith "echo foo" "f"
+assert_startswith "echo foo" "foo"
+assert_startswith "echo foo; echo bar" "foo"
+
+# Tests expecting failure
+assert_failure 'assert_startswith "echo foo" "oo"'
+assert_failure 'assert_startswith "echo foo; echo bar" "foo bar"'
+assert_failure 'assert_startswith "echo foo" "."'
+
+assert_end assert_startswith
+
+###
+### assert_endswith tests
+###
+
+# Tests expecting success
+assert_endswith "echo foo" "oo"
+assert_endswith "echo foo" "foo"
+assert_endswith "echo foo; echo bar" "bar"
+
+# Tests expecting failure
+assert_failure 'assert_endswith "echo foo" "f"'
+assert_failure 'assert_endswith "echo foo; echo bar" "foo bar"'
+assert_failure 'assert_endswith "echo foo" "."'
+
+assert_end assert_endswith
