@@ -11,8 +11,8 @@ is a small test-driven development suite for Bash, *(forked from [lehmannro/asse
 
 ## Features
 
-- lightweight interface: ``assert`` and ``assert_raises``
-- minimal setup -- source ``assert.sh`` and you're done
+- lightweight interface: `assert` and `assert_raises``
+- minimal setup -- source `assert.sh` and you're done
 - test grouping in individual suites
 - time benchmarks with real-time display of test progress
 - run all tests, stop on first failure, or collect numbers only
@@ -22,29 +22,35 @@ is a small test-driven development suite for Bash, *(forked from [lehmannro/asse
 
 ## Example
 
-  . assert.sh
+```sh
+. assert.sh
 
-  # `echo test` is expected to write "test" on stdout
-  assert "echo test" "test"
-  # `seq 3` is expected to print "1", "2" and "3" on different lines
-  assert "seq 3" "1\n2\n3"
-  # exit code of `true` is expected to be 0
-  assert_raises "true"
-  # exit code of `false` is expected to be 1
-  assert_raises "false" 1
-  # end of test suite
-  assert_end examples
+# `echo test` is expected to write "test" on stdout
+assert "echo test" "test"
+# `seq 3` is expected to print "1", "2" and "3" on different lines
+assert "seq 3" "1\n2\n3"
+# exit code of `true` is expected to be 0
+assert_raises "true"
+# exit code of `false` is expected to be 1
+assert_raises "false" 1
+# end of test suite
+assert_end examples
+```
 
-If you had written the above snippet into ``tests.sh`` you could invoke it
+If you had written the above snippet into `tests.sh` you could invoke it
 without any extra hassle::
 
-  $ ./tests.sh
-  all 4 examples tests passed in 0.014s.
+```sh
+$ ./tests.sh
+all 4 examples tests passed in 0.014s.
+```
 
 Now, we will add a failing test case to our suite::
 
-  # expect `exit 127` to terminate with code 128
-  assert_raises "exit 127" 128
+```sh
+# expect `exit 127` to terminate with code 128
+assert_raises "exit 127" 128
+```
 
 Remember to insert test cases before `assert_end` (or write another
 `assert_end` to the end of your file). Otherwise test statistics will be
@@ -52,16 +58,20 @@ omitted.
 
 When run, the output is::
 
-  test #5 "exit 127" failed:
-          program terminated with code 127 instead of 128
-  1 of 5 examples tests failed in 0.019s.
+```sh
+test #5 "exit 127" failed:
+        program terminated with code 127 instead of 128
+1 of 5 examples tests failed in 0.019s.
+```
 
 The overall status code is 1 (except if you modified the exit code manually)::
 
-  $ bash tests.sh
-  ...
-  $ echo $?
-  1
+```sh
+$ bash tests.sh
+...
+$ echo $?
+1
+```
 
 
 ## Reference
@@ -69,7 +79,7 @@ The overall status code is 1 (except if you modified the exit code manually)::
 - `assert <command> [stdout] [stdin]`
 
   Check for an expected output when running your command. `stdout` supports all
-  control sequences ``echo -e`` interprets, eg. ``\n`` for a newline. The
+  control sequences `echo -e` interprets, eg. `\n` for a newline. The
   default `stdout` is assumed to be empty.
 
 - `assert_raises <command> [exitcode] [stdin]`
@@ -89,7 +99,7 @@ The overall status code is 1 (except if you modified the exit code manually)::
 
 - `skip_if <command>`
 
-  Skip the following test case if `command` exits successfully.  (``skip``
+  Skip the following test case if `command` exits successfully.  (`skip`
   disclaimer applies.)  Use this if you want to run a test only if some
   precondition is met, eg. the test needs root privileges or network access.
 
@@ -98,6 +108,7 @@ The overall status code is 1 (except if you modified the exit code manually)::
 
 See `assert.sh --help` for command line options on test runners.
 
+```
   -v, --verbose    Generate real-time output for every individual test run.
   -x, --stop       Stop running tests after the first failure.
                    (Default: run all tests.)
@@ -108,6 +119,7 @@ See `assert.sh --help` for command line options on test runners.
   -c, --continue   Do not modify exit code depending on overall suite status.
   -h               Show brief usage information and exit.
   --help           Show usage manual and exit.
+```
 
 
 ### Environment variables
