@@ -5,6 +5,7 @@ is a small test-driven development suite for Bash, *(forked from [lehmannro/asse
 [![language: bash](https://img.shields.io/badge/language-bash-447799.svg?style=flat-square)]()
 [![license: LGPLv3](https://img.shields.io/badge/license-LGPLv3-447799.svg?style=flat-square)](https://github.com/joseluis/assert.sh/blob/master/LICENSE)
 [![Build Status](https://img.shields.io/travis/joseluis/assert.sh/master.svg)](https://travis-ci.org/joseluis/assert.sh)
+[![Code Climate](https://img.shields.io/codeclimate/github/joseluis/assert.sh.svg)](https://codeclimate.com/github/joseluis/assert.sh)
 
 ---
 
