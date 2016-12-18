@@ -1,6 +1,6 @@
 # assert.sh
 
-is a Bash unit testing framework in just one file, *(forked from [lehmannro/assert.sh](https://github.com/lehmannro/assert.sh))*
+is a Bash unit testing framework in just one file, *(forked from [assert.sh](https://github.com/lehmannro/assert.sh))*
 
 [![version: 1.2.X](https://img.shields.io/badge/version-1.2.X-3D9970.svg?style=flat-square)]()
 [![language: bash](https://img.shields.io/badge/language-bash-447799.svg?style=flat-square)]()
@@ -12,19 +12,20 @@ is a Bash unit testing framework in just one file, *(forked from [lehmannro/asse
 
 ### Table of Contents
 
-- [Features](#features)
-- [Example](#example)
-- [Reference](#reference)
-  - [Functions](#functions)
-  - [Options & variables](#options--variables)
+- [Features](#features-)
+- [Example](#example-)
+- [Install](#install-)
+- [Reference](#reference-)
+  - [Functions](#functions-)
+  - [Options & variables](#options--variables-)
 
 ---
 
 
-## Features
+## Features [▴](#table-of-contents "Back to TOC")
 
-- lightweight interface: `assert` and `assert_raises``
-- minimal setup -- source `assert.sh` and you're done
+- minimal setup
+- lightweight interface
 - test grouping in individual suites
 - time benchmarks with real-time display of test progress
 - run all tests, stop on first failure, or collect numbers only
@@ -32,60 +33,90 @@ is a Bash unit testing framework in just one file, *(forked from [lehmannro/asse
 - skip individual tests
 
 
-## Example
+## Example [▴](#table-of-contents "Back to TOC")
 
 ```sh
-source assert.sh          # source this library
+source assert.sh
 
-assert "echo test" "test" # `echo test` is expected to write `test` on stdout
-assert "seq 3" "1\n2\n3"  # `seq 3` to print `1`, `2` & `3` on different lines
-assert_raises "true"      # exit code of `true` is expected to be 0
-assert_raises "false" 1   # exit code of `false` is expected to be 1
+# Command exit codes
+assert_sucess  "true"
+assert_failure "false"
+assert_raises  "unknown_cmd" 127
 
-assert_end "examples"     # end of the test suite
+# Expected output
+assert "echo test" "test"
+assert "seq 3" "1\n2\n3"
+
+assert_end "example part 1"
+
+#
+
+assert_end "example part 2"
+
 ```
 
-If you had written the above snippet into `tests.sh`, and made it executable,
+If you had written the above snippet into `test-example.sh`, and made it executable,
 you could invoke it without any extra hassle:
 
 ```sh
-$ ./tests.sh
+$ ./test-example.sh
 all 4 examples tests passed in 0.014s.
 ```
 
 Now, we will add a failing test case to our suite:
 
 ```sh
-assert_raises "exit 127" 128    # expect `exit 127` to terminate with code 128
+assert_raises "exit 127" 128
 ```
 
-Remember to insert test cases before `assert_end` (or write another
-`assert_end` to the end of your file). Otherwise test statistics will be
+Remember to always run `assert_end` after the tests. Otherwise test statistics will be
 omitted.
 
-When run, the output is:
+When run, the new output is:
 
-```sh
+```
 test #5 "exit 127" failed:
         program terminated with code 127 instead of 128
 1 of 5 examples tests failed in 0.019s.
 ```
 
-The overall status code is 1 (except if you modified the exit code manually):
+The status code is 1 (except if you modified the exit code manually):
 
 ```sh
-$ bash tests.sh
-...
 $ echo $?
 1
 ```
 
 
-## Reference
+## Install [▴](#table-of-contents "Back to TOC")
 
 
+- **Manually**
 
-### Functions
+  ```sh
+  $ wget https://raw.github.com/joseluis/assert.sh/master/assert.sh && chmod +x assert.sh
+  ```
+
+- Using **[bpkg](http://www.bpkg.io/)**
+
+  ```sh
+  $ bpkg install joseluis/assert.sh # -g
+  ```
+
+- Using **[basher](https://github.com/basherpm/basher)**
+
+  ```sh
+  $ basher install joseluis/assert.sh
+  ```
+
+
+## Reference [▴](#table-of-contents "Back to TOC")
+
+
+### Functions [▴](#table-of-contents "Back to TOC")
+
+
+#### Basic
 
 - `assert <command> [stdout] [stdin]`
 
@@ -114,33 +145,30 @@ $ echo $?
   disclaimer applies.)  Use this if you want to run a test only if some
   precondition is met, eg. the test needs root privileges or network access.
 
-- Extra wrappers for convenience:
 
-  - `assert_success <command> [stdin]`
+#### Extra
 
-    Verify `command` terminated successfully.
+- `assert_success <command> [stdin]`
 
-  - `assert_failure<command> [stdin]`
+  Verify `command` terminated successfully.
 
-    Verify `command` terminated with failure.
+- `assert_failure <command> [stdin]`
 
-  - `assert_contains <command> <expected output...>`
+  Verify `command` terminated with failure.
 
-
-  - `assert_matches <command> <expected output...>`
+- `assert_contains <command> <expected output...>`
 
 
-  - `assert_startswith <command> <expected start to stdout>`
+- `assert_matches <command> <expected output...>`
 
 
-  - `assert_endswith <command> <expected end to stdout>`
+- `assert_startswith <command> <expected start to stdout>`
 
 
-  - `_assert_with_grep <grep modifiers> <command> <expected output...>`
+- `assert_endswith <command> <expected end to stdout>`
 
 
-
-### Options & Variables
+### Options & Variables [▴](#table-of-contents "Back to TOC")
 
 See `assert.sh --help` for command line options on test runners.
 

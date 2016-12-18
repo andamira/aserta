@@ -3,7 +3,7 @@
 # assert.sh
 # a Bash unit-testing framework in just one file
 #
-# Version    : 1.2.3
+# Version    : 1.2.4
 # Repository : http://github.com/joseluis/assert.sh
 # Authors    :
 #   - Robert Lehmann © 2009-2015
