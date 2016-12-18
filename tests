@@ -1,6 +1,19 @@
 #!/bin/bash
 
-. assert.sh
+source assert.sh
+
+_clean() {
+    _assert_reset # reset state
+
+	# shellcheck disable=SC1007
+	# shellcheck disable=SC2034
+    DEBUG= STOP= INVARIANT=1 DISCOVERONLY= CONTINUE= # reset flags
+
+    eval "$*" # read new flags
+}
+
+# "Demo" tests
+# ------------
 
 assert "echo"                           # no output expected
 assert "echo foo" "foo"                 # output expected
@@ -9,24 +22,22 @@ assert_raises "true" 0 ""               # status code expected
 assert_raises "exit 127" 127 ""         # status code expected
 assert "head -1 < $0" "#!/bin/bash"     # redirections
 assert "seq 2" "1\n2"                   # multi-line output expected
-# shellcheck disable=SC2016
+
+										# shellcheck disable=SC2016
 assert_raises 'read a; exit $a' 42 "42" # variables still work
+
 assert "echo 1;
 echo 2      # ^" "1\n2"                 # semicolon required!
+
 assert 'echo " * "' " * "               # don't let the shell evaluate arguments
 assert "echo '%s --'" "%s --"           # don't escape user content
 assert "echo \"foo\nbar\"" "foo\nbar"   # interpretation of backslash escape
+
 assert_end demo
 
-_clean() {
-    _assert_reset # reset state
 
-	# reset flags
-	# shellcheck disable=SC1007
-    DEBUG= STOP= INVARIANT=1 DISCOVERONLY= CONTINUE=
-
-    eval "$*" # read new flags
-}
+# "Output" tests
+# --------------
 
 # clean output
 assert "_clean; assert true; assert_end" \
@@ -69,7 +80,12 @@ assert "_clean; skip_if bash -c 'exit 1'; assert_raises false; assert_end;" \
 assert "_clean; skip_if 'id | grep \$(echo \$USER)';
 assert_raises false; assert_end;" \
 "all 0 tests passed."
+
 assert_end output
+
+
+# "Interaction" tests
+# -------------------
 
 # stderr should NOT leak if ignored
 assert "_clean; assert less" ""
@@ -113,6 +129,10 @@ assert_raises "_clean; shopt -s extdebug; skip; assert_raises false; shopt extde
 
 assert_end interaction
 
+
+# "Regression" tests
+# -------------------
+
 # commit: fixed output to report all errors, not just the first
 assert "_clean;
 assert_raises false; assert_raises false;
@@ -121,19 +141,24 @@ assert_end" 'test #1 "false" failed:
 test #2 "false" failed:
 \tprogram terminated with code 1 instead of 0
 2 of 2 tests failed.'
+
 # commit: added default value for assert_raises
 assert_raises "_clean; assert_raises true; assert_end" 0
+
 # commit: fixed verbose failure reports in assert_raises
 assert "_clean DEBUG=1; assert_raises false; assert_end" 'X
 test #1 "false" failed:
 \tprogram terminated with code 1 instead of 0
 1 of 1 tests failed.'
+
 # commit: redirected assert_raises output
 assert "_clean; assert_raises 'echo 1'; assert_end" "all 1 tests passed."
+
 # commit: fixed --discover to reset properly
 assert "_clean DISCOVERONLY=1;
 assert 1; assert 1; assert_end;
 assert 1; assert_end;" "collected 2 tests.\ncollected 1 tests."
+
 # commit: stopped errors from leaking into other test suites
 assert "_clean;
 assert_raises false; assert_raises false; assert_end;
@@ -145,9 +170,11 @@ test #2 "false" failed:
 test #1 "false" failed:
 \tprogram terminated with code 1 instead of 0
 1 of 1 tests failed.'
+
 # issue 1: assert.sh: line 87: DISCOVERONLY: unbound variable
 assert "_clean; set -u; assert_raises true; assert true; assert_end" \
 "all 2 tests passed."
+
 # issue 3: Not working on Mac OS X 10.7.5
 assert "
 _date=20;
@@ -158,38 +185,32 @@ _clean INVARIANT=;
 assert date 20N;
 _date=22;
 assert_end" "all 1 tests passed in 2.000s."
+
 # commit: supported formatting codes
 assert "echo %s" "%s"
+
 # We trim the output from wc as the BSD version (on Mac OS) contains leading spaces
 assert "echo -n %s | wc -c | tr -d '[[:space:]]'" "2"
-# date with no nanosecond support
-date() {         # date mock
+
+# date mock, with no nanosecond support
+date() {
     echo "123N"
 }
 assert '_clean DEBUG=1 INVARIANT=; tests_starttime="0N"; assert_end' \
        '\nall 0 tests passed in 123.000s.'
 unset -f date  # bring back original date
+
 # commit: Supporting multiline inputs
-# We trim the output from wc as the BSD version (on Mac OS) contains leading spaces
+# trim the output from wc as the BSD version (on Mac OS) has leading spaces
 assert 'echo "this
 is a multiline echo" | wc -l | tr -d "[[:space:]]"' "2"
 assert 'echo -e "this\nis a multiline echo" | wc -l | tr -d "[[:space:]]"' "2"
+
 assert_end regression
 
 
-
-### assert-extras.sh
-
-
-assert "echo foo" "foo"
-assert_raises "true" 0
-assert_raises "exit 127" 127
-
-assert_end sanity
-
-###
-### assert_success tests
-###
+# assert_success tests
+# --------------------
 
 # Tests expecting success
 assert_success "true"
@@ -202,9 +223,9 @@ assert_raises 'assert_success "exit 1"' 1
 
 assert_end assert_success
 
-###
-### assert_failure tests
-###
+
+# assert_failure tests
+# --------------------
 
 # Tests expecting success
 assert_failure "false"
@@ -219,9 +240,9 @@ assert_raises 'assert_failure "echo foo"' 1
 
 assert_end assert_failure
 
-###
-### assert_contains tests
-###
+
+# assert_contains tests
+# ---------------------
 
 # Tests expecting success
 assert_contains "echo foo" "foo"
@@ -244,9 +265,9 @@ assert_failure 'assert_contains "echo foo bar baz" "bar" "foo baz"'
 
 assert_end assert_contains
 
-###
-### assert_matches tests
-###
+
+# assert_matches tests
+# --------------------
 
 # Tests expecting success
 assert_matches "echo foo" "f.."
@@ -267,9 +288,9 @@ assert_failure 'assert_matches "echo foo bar baz" "bar" "foo baz"'
 
 assert_end assert_matches
 
-###
-### assert_startswith tests
-###
+
+# assert_startswith tests
+# -----------------------
 
 # Tests expecting success
 assert_startswith "echo foo" "f"
@@ -283,9 +304,9 @@ assert_failure 'assert_startswith "echo foo" "."'
 
 assert_end assert_startswith
 
-###
-### assert_endswith tests
-###
+
+# assert_endswith tests
+# ---------------------
 
 # Tests expecting success
 assert_endswith "echo foo" "oo"

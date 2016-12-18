@@ -1,9 +1,9 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 #
 # assert.sh
 # bash unit testing framework
 #
-# Version    : 1.2.1
+# Version    : 1.2.2
 # Repository : http://github.com/joseluis/assert.sh
 # Authors    :
 #   - Robert Lehmann © 2009-2015
@@ -11,22 +11,23 @@
 # License    : LGPLv3
 #
 
-export DISCOVERONLY=${DISCOVERONLY:-}
-export DEBUG=${DEBUG:-}
-export STOP=${STOP:-}
-export INVARIANT=${INVARIANT:-}
-export CONTINUE=${CONTINUE:-}
+export DISCOVERONLY="${DISCOVERONLY:-}"
+export DEBUG="${DEBUG:-}"
+export STOP="${STOP:-}"
+export INVARIANT="${INVARIANT:-}"
+export CONTINUE="${CONTINUE:-}"
 
 args="$(getopt -n "$0" -l \
-	verbose,help,stop,discover,invariant,continue vhxdic "$*")" \
-|| exit -1
+	verbose,help,stop,discover,invariant,continue vhxdic "$*")" || exit -1
+
 for arg in $args; do
 	case "$arg" in
 		-h)
 			echo "$0 [-vxidc]" \
 				"[--verbose] [--stop] [--invariant] [--discover] [--continue]"
 			echo "$(sed 's/./ /g' <<< "$0") [-h] [--help]"
-			exit 0;;
+			exit 0 ;;
+
 		--help)
 			cat <<- EOF
 			Usage: $0 [options]
@@ -41,17 +42,22 @@ for arg in $args; do
 			  -h               show brief usage information and exit
 			  --help           show this help message and exit
 			EOF
-			exit 0;;
+			exit 0 ;;
+
 		-v|--verbose)
-			DEBUG=1;;
+			DEBUG=1 ;;
+
 		-x|--stop)
-			STOP=1;;
+			STOP=1 ;;
+
 		-i|--invariant)
-			INVARIANT=1;;
+			INVARIANT=1 ;;
+
 		-d|--discover)
-			DISCOVERONLY=1;;
+			DISCOVERONLY=1 ;;
+
 		-c|--continue)
-			CONTINUE=1;;
+			CONTINUE=1 ;;
 	esac
 done
 
@@ -64,16 +70,21 @@ _assert_reset() {
 	tests_starttime="$(date +%s%N)" # nanoseconds_since_epoch
 }
 
+
+# assert_end [suite ..]
 assert_end() {
-	# assert_end [suite ..]
 	tests_endtime="$(date +%s%N)"
+
 	# required visible decimal place for seconds (leading zeros if needed)
-	local tests_time="$( \
-		printf "%010d" "$(( ${tests_endtime/%N/000000000}
-							- ${tests_starttime/%N/000000000} ))")"  # in ns
+	local tests_time; tests_time="$( printf "%010d" \
+		"$(( ${tests_endtime/%N/000000000}
+			- ${tests_starttime/%N/000000000} ))")"  # in ns
 	tests="$tests_ran ${*:+$* }tests"
-	[[ -n "$DISCOVERONLY" ]] && echo "collected $tests." && _assert_reset && return
+
+	[[ -n "$DISCOVERONLY" ]] && echo "collected $tests." \
+		&& _assert_reset && return
 	[[ -n "$DEBUG" ]] && echo
+
 	# to get report_time split tests_time on 2 substrings:
 	#   ${tests_time:0:${#tests_time}-9} - seconds
 	#   ${tests_time:${#tests_time}-9:3} - milliseconds
@@ -94,8 +105,9 @@ assert_end() {
 	_assert_reset
 }
 
+
+# assert <command> <expected stdout> [stdin]
 assert() {
-	# assert <command> <expected stdout> [stdin]
 	(( tests_ran++ )) || :
 	[[ -z "$DISCOVERONLY" ]] || return
 	expected=$(echo -ne "${2:-}")
@@ -110,8 +122,9 @@ assert() {
 	_assert_fail "expected $expected${_indent}got $result" "$1" "${3:-}"
 }
 
+
+# assert_raises <command> <expected code> [stdin]
 assert_raises() {
-	# assert_raises <command> <expected code> [stdin]
 	(( tests_ran++ )) || :
 	[[ -z "$DISCOVERONLY" ]] || return
 	status=0
@@ -121,11 +134,13 @@ assert_raises() {
 		[[ -z "$DEBUG" ]] || echo -n .
 		return
 	fi
-	_assert_fail "program terminated with code $status instead of $expected" "$1" "$3"
+	_assert_fail "program terminated with code $status instead of $expected" \
+		"$1" "$3"
 }
 
+
+# _assert_fail <failure> <command> <stdin>
 _assert_fail() {
-	# _assert_fail <failure> <command> <stdin>
 	[[ -n "$DEBUG" ]] && echo -n X
 	report="test #$tests_ran \"$2${3:+ <<< $3}\" failed:${_indent}$1"
 	if [[ -n "$STOP" ]]; then
@@ -138,24 +153,29 @@ _assert_fail() {
 	return 1
 }
 
+
+# skip_if <command ..>
 skip_if() {
-	# skip_if <command ..>
 	(eval "$@") > /dev/null 2>&1 && status=0 || status="$?"
 	[[ "$status" -eq 0 ]] || return
 	skip
 }
 
+
+# skip (no arguments)
 skip() {
-	# skip  (no arguments)
 	shopt -q extdebug && tests_extdebug=0 || tests_extdebug=1
 	shopt -q -o errexit && tests_errexit=0 || tests_errexit=1
+
 	# enable extdebug so returning 1 in a DEBUG trap handler skips next command
 	shopt -s extdebug
+
 	# disable errexit (set -e) so we can safely return 1 without causing exit
 	set +o errexit
 	tests_trapped=0
 	trap _skip DEBUG
 }
+
 _skip() {
 	if [[ $tests_trapped -eq 0 ]]; then
 		# DEBUG trap for command we want to skip.  Do not remove the handler
@@ -175,13 +195,15 @@ _skip() {
 
 _assert_reset
 : ${tests_suite_status:=0}  # remember if any of the tests failed so far
-: ${tests_ran_total:=0}	 # remember the total number of tests ran (inc. failures)
+: ${tests_ran_total:=0}	    # remember total number of tests (inc. failures)
 : ${tests_failed_total:=0}  # remember the total number of test failures
+
 _assert_cleanup() {
 	local status=$?
 	# modify exit code if it's not already non-zero
 	[[ $status -eq 0 && -z $CONTINUE ]] && exit $tests_suite_status
 }
+
 trap _assert_cleanup EXIT
 
 
@@ -219,7 +241,7 @@ assert_startswith() {
 	assert_success "[[ '$($1)' == '$2'* ]]"
 }
 
-# assert_endswith <command> <expected start to stdout>
+# assert_endswith <command> <expected end to stdout>
 assert_endswith() {
 	assert_success "[[ '$($1)' == *'$2' ]]"
 }
@@ -227,7 +249,7 @@ assert_endswith() {
 # _assert_with_grep <grep modifiers> <command> <expected output...>
 _assert_with_grep() {
 	local grep_modifier="$1"
-	local output="$($2)"
+	local output; output="$($2)"
 	shift 2
 
 	while [ $# != 0 ]; do
@@ -239,11 +261,12 @@ _assert_with_grep() {
 # Returns the resolved command, preferring any gnu-versions of the cmd (prefixed with 'g') on
 # non-Linux systems such as Mac OS, and falling back to the standard version if not.
 _cmd() {
-	local cmd="$1"
+	declare cmd gnu_cmd gnu_cmd_found
 
+	cmd="$1"
+	gnu_cmd="g$cmd"
+	gnu_cmd_found=$(which "$gnu_cmd" 2> /dev/null)
 
-	local gnu_cmd="g$cmd"
-	local gnu_cmd_found=$(which "$gnu_cmd" 2> /dev/null)
 	if [ "$gnu_cmd_found" ]; then
 		echo "$gnu_cmd_found"
 	else
