@@ -1,2 +1,23 @@
-language: bash
-script: bash tests
+sudo: false
+language: generic
+
+matrix:
+  include:
+
+      # Ubuntu Precise
+    - os: linux
+      dist: precise
+      sudo: false
+
+      # Ubuntu 14.04.4 LTS (Trusty Tahr)
+    - os: linux
+      dist: trusty
+      sudo: false
+
+      # OS X 10.12
+    - os: osx
+      osx_image: xcode8.2
+
+  fast_finish: true
+
+script: ./tests

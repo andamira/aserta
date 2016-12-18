@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
 # assert.sh
-# bash unit testing framework
+# a Bash unit-testing framework in just one file
 #
-# Version    : 1.2.2
+# Version    : 1.2.3
 # Repository : http://github.com/joseluis/assert.sh
 # Authors    :
 #   - Robert Lehmann © 2009-2015

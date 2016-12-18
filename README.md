@@ -1,6 +1,6 @@
 # assert.sh
 
-is a small test-driven development suite for Bash, *(forked from [lehmannro/assert.sh](https://github.com/lehmannro/assert.sh))*
+is a Bash unit testing framework in just one file, *(forked from [lehmannro/assert.sh](https://github.com/lehmannro/assert.sh))*
 
 [![version: 1.2.X](https://img.shields.io/badge/version-1.2.X-3D9970.svg?style=flat-square)]()
 [![language: bash](https://img.shields.io/badge/language-bash-447799.svg?style=flat-square)]()
