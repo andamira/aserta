@@ -2,9 +2,10 @@
 
 a handy unit testing framework, in shell script; *originally forked from [assert.sh](https://github.com/lehmannro/assert.sh)*
 
-[![version: 2.0](https://img.shields.io/badge/version-2.0-3D9970.svg?style=flat-square)]()
-[![language: bash](https://img.shields.io/badge/language-bash-447799.svg?style=flat-square)]()
-[![Build Status](https://img.shields.io/travis/andamira/aserta/master.svg)](https://travis-ci.org/andamira/aserta)
+[![language: bash](https://img.shields.io/badge/language-bash-447799.svg?style=flat-square "made in Bash")]()
+[![version: stable](https://img.shields.io/github/tag/andamira/aserta.svg?label=stable+version&style=flat-square "stable version")](https://github.com/andamira/aserta/commits/stable)
+[![Build Status: stable](https://img.shields.io/travis/andamira/aserta/stable.svg?label=stable "stable build status")](https://travis-ci.org/andamira/aserta/branches)
+[![Build Status: master](https://img.shields.io/travis/andamira/aserta/master.svg?label=master "master build status")](https://travis-ci.org/andamira/aserta/)
 [![Code Climate](https://img.shields.io/codeclimate/github/andamira/aserta.svg)](https://codeclimate.com/github/andamira/aserta)
 
 ---
