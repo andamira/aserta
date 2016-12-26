@@ -2,9 +2,10 @@
 
 a handy unit testing framework, in shell script; *originally forked from [assert.sh](https://github.com/lehmannro/assert.sh)*
 
-[![version: 2.0](https://img.shields.io/badge/version-2.0-3D9970.svg?style=flat-square)]()
-[![language: bash](https://img.shields.io/badge/language-bash-447799.svg?style=flat-square)]()
-[![Build Status](https://img.shields.io/travis/andamira/aserta/master.svg)](https://travis-ci.org/andamira/aserta)
+[![language: bash](https://img.shields.io/badge/language-bash-447799.svg?style=flat-square "made in Bash")]()
+[![version: stable](https://img.shields.io/github/tag/andamira/aserta.svg?label=stable+version&style=flat-square "stable version")](https://github.com/andamira/aserta/commits/stable)
+[![Build Status: stable](https://img.shields.io/travis/andamira/aserta/stable.svg?label=stable "stable build status")](https://travis-ci.org/andamira/aserta/branches)
+[![Build Status: master](https://img.shields.io/travis/andamira/aserta/master.svg?label=master "master build status")](https://travis-ci.org/andamira/aserta/)
 [![Code Climate](https://img.shields.io/codeclimate/github/andamira/aserta.svg)](https://codeclimate.com/github/andamira/aserta)
 
 ---
@@ -12,12 +13,15 @@ a handy unit testing framework, in shell script; *originally forked from [assert
 ### Table of Contents
 
 - [Features](#features-)
-- [Example](#example-)
+- [Examples](#examples-)
+  - [Sourcing](#sourcing-)
+  - [Running](#running-)
 - [Install](#install-)
 - [Reference](#reference-)
   - [Functions](#functions-)
     - [Return Status](#return-status-)
     - [Expected Output](#expected-output-)
+    - [String comparison](#string-comparison-)
     - [Flow Control](#flow-control-)
   - [Options](#options-)
 
@@ -34,9 +38,12 @@ a handy unit testing framework, in shell script; *originally forked from [assert
 - skip individual tests
 
 
-## Example [▴](#table-of-contents "Back to TOC")
+## Examples [▴](#table-of-contents "Back to TOC")
 
-Write the following snippet into a new file named `my-tests`, for example:
+### Sourcing [▴](#table-of-contents "Back to TOC")
+
+Write the following snippet into a new file named `my-tests`,
+in the same directory as the `aserta` script is located.
 
 ```sh
 #!/usr/bin/env bash
@@ -77,7 +84,7 @@ Run it again to check how it fails now:
 ```
 $ bash my-tests
 test #1 "false" failed:
-  program terminated with code 1 instead of 0
+        program terminated with code 1 instead of 0
 1 of 9 example tests failed in 0.089s.
 ```
 
@@ -88,9 +95,50 @@ $ echo $?
 1
 ```
 
+### Running [▴](#table-of-contents "Back to TOC")
+
+It is possible to run tests without sourcing the script, just by
+passing the desired test function as an argument to the script, just
+after the script options, and after that the test function arguments. E.g.:
+
+```
+$ aserta --verbose assert_raises unknown-command 127
+.
+```
+
+This way of running tests has several disadvantages:
+
+- Not supported functions: `skip`, `skip_if` and `assert_end`.
+- Tests can only be run one at a time.
+- Can't show test suite summary statistics.
+
+To run a script without sourcing, first make sure the script is executable:
+
+```
+$ chmod +x aserta
+```
+
+And remember to at least provide the option -v (--verbose) or the option -x
+(--stop) to show the result of the test:
+
+```
+$ ./aserta -v assert_success true
+.
+
+$ ./aserta -v assert_success false
+X
+```
+
+```
+$ ./aserta -x assert_success true
+
+$ ./aserta -x assert_success false
+test #1 "false" failed:
+        program terminated with code 1 instead of 0
+```
+
 
 ## Install [▴](#table-of-contents "Back to TOC")
-
 
 - Manually
 
@@ -144,21 +192,56 @@ $ echo $?
 
    The default STDOUT is assumed to be empty.
 
+- **`assert_startswith`** `<command> <expected start of STDOUT>`
+
+  Verify the command output *starts* with the expected string.
+
+- **`assert_endswith`** `<command> <expected end of STDOUT>`
+
+  Verify the command output *ends* with the expected string.
+
 - **`assert_contains`** `<command> <expected part of STDOUT>`
 
   Verify the command output *contains* the expected string.
 
-- **`assert_startswith`** `<command> <expected start to STDOUT>`
+- **`assert_NOTcontains`** `<command> <not expected part of STDOUT>`
 
-  Verify the command output *starts* with the expected string.
+  Verify the command output does *not contain* the expected string.
 
-- **`assert_endswith`** `<command> <expected end to STDOUT>`
-
-  Verify the command output *ends* with the expected string.
-
-- **`assert_matches`** `<command> <pattern>`
+- **`assert_matches`** `<command> <expected matching pattern>`
 
   Verify the command output *matches* the extended REGEXP pattern.
+
+
+#### String Comparison [▴](#table-of-contents "Back to TOC")
+
+- **`assert_str_equals`** `<string> <expected string>`
+
+  Verify the first string *equals* the second string.
+
+- **`assert_str_NOTequals`** `<string> <not expected string>`
+
+  Verify the first string does *not equal* the second string.
+
+- **`assert_str_startswith`** `<string> <expected start of string>`
+
+  Verify the first string *starts* with the second string.
+
+- **`assert_str_endswith`** `<string> <expected end of string>`
+
+  Verify the first string *ends* with the second string.
+
+- **`assert_str_contains`** `<string> <expected part of string content>`
+
+  Verify the first string *contains* the second string.
+
+- **`assert_str_NOTcontains`** `<string> <not expected part of string content>`
+
+  Verify the first string does *not contain* the second string.
+
+- **`assert_str_matches`** `<string> <expected matching pattern>`
+
+  Verify the first string *matches* the extended REGEXP pattern.
 
 
 #### Flow Control [▴](#table-of-contents "Back to TOC")
@@ -187,12 +270,11 @@ $ echo $?
 
 See `aserta --help` for command line options on test runners.
 
-  command line option   |   ENV variable  | description
------------------------ | --------------- | -------------
-`-c`, `--continue`      | `$CONTINUE`     | Don't modify exit code depending on suite status.
-`-d`, `--discover-only` | `$DISCOVERONLY` | Collect test suites and number of tests only.
-`-i`, `--invariant`     | `$INVARIANT`    | Don't measure runtime. Useful for parsing output.
-`-v`, `--verbose`       | `$DEBUG`        | Real-time output for every individual test.
-`-x`, `--stop`          | `$STOP`         | Stop running tests after the first failure.
-
+command line option |   ENV variable  | description
+------------------- | --------------- | -------------
+`-c`, `--continue`  | `$CONTINUE`     | Don't modify exit code depending on suite status.
+`-d`, `--discover`  | `$DISCOVERONLY` | Collect test suites and number of tests only.
+`-i`, `--invariant` | `$INVARIANT`    | Don't measure runtime. Useful for parsing output.
+`-v`, `--verbose`   | `$DEBUG`        | Real-time output for every individual test.
+`-x`, `--stop`      | `$STOP`         | Stop running tests after the first failure.
 
