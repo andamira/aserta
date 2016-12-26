@@ -260,11 +260,23 @@ assert_failure 'assert_contains "echo foo" "f.."'
 assert_contains "echo foo bar" "foo bar"
 assert_failure 'assert_contains "echo foo; echo bar" "foo bar"'
 
-# Multi-argument tests
-assert_contains "echo foo bar baz" "foo" "baz"
-assert_failure 'assert_contains "echo foo bar baz" "bar" "foo baz"'
-
 assert_end assert_contains
+
+
+# assert_NOTcontains tests
+# ------------------------
+
+# Tests expecting success
+assert_NOTcontains "echo foo" "bar"
+assert_NOTcontains "echo foo bar" "oba"
+
+# Tests expecting failure
+assert_failure 'assert_NOTcontains "echo foo" "f"'
+assert_failure 'assert_NOTcontains "echo foo" "foo"'
+assert_failure 'assert_NOTcontains "echo foobar" "ob"'
+assert_failure 'assert_NOTcontains "echo foo bar" "o ba"'
+
+assert_end assert_NOTcontains
 
 
 # assert_matches tests
@@ -274,7 +286,7 @@ assert_end assert_contains
 assert_matches "echo foo" "f.."
 assert_matches "echo foobar" "f."
 assert_matches "echo foo bar" "^foo bar$"
-assert_matches "echo foo bar" "[az ]+"
+assert_matches "echo foo bar" "[a-z ]+"
 
 # Tests expecting failure
 assert_failure 'assert_matches "echo foot" "foo$"'
@@ -282,10 +294,6 @@ assert_failure 'assert_matches "echo foot" "foo$"'
 # Multi-word argument tests
 assert_matches "echo foo bar" "foo .*"
 assert_failure 'assert_matches "echo foo; echo bar" "foo .*"'
-
-# Multi-argument tests
-assert_matches "echo foo bar baz" "^f.." "baz$"
-assert_failure 'assert_matches "echo foo bar baz" "bar" "foo baz"'
 
 assert_end assert_matches
 
@@ -320,3 +328,77 @@ assert_failure 'assert_endswith "echo foo; echo bar" "foo bar"'
 assert_failure 'assert_endswith "echo foo" "."'
 
 assert_end assert_endswith
+
+
+# string comparisons tests
+# ------------------------
+
+assert_str_equals "foo" "foo"
+assert_failure 'assert_str_equals "foot" "foo"'
+assert_failure 'assert_str_equals "foot" "oot"'
+assert_failure 'assert_str_equals "foot" "o"'
+
+assert_str_NOTequals "foo" "bar"
+assert_str_NOTequals "foo" "FOO"
+assert_failure 'assert_str_NOTequals "foot" "foot"'
+
+assert_str_contains "foo" "foo"
+assert_str_contains "foobar" "foo"
+assert_str_contains "foo bar" "oo b"
+assert_str_contains "foo bar" "bar"
+assert_str_contains "foo bar" "foo bar"
+assert_failure 'assert_str_contains "foot" "to"'
+
+assert_str_NOTcontains "foo" "of"
+assert_str_NOTcontains "foo bar" "oba"
+assert_failure 'assert_str_NOTcontains "foot" "oo"'
+
+assert_str_startswith "foo" "f"
+assert_str_startswith "foo" "foo"
+assert_failure 'assert_str_startswith "foot" "t"'
+
+assert_str_endswith "foo" "oo"
+assert_str_endswith "foo" "foo"
+assert_failure 'assert_str_endswith "foot" "f"'
+
+assert_str_matches "foo" "f.."
+assert_str_matches "foobar" "f."
+assert_str_matches "foo bar" "^foo bar$"
+assert_str_matches "foo bar" "[az ]+"
+assert_str_matches "foo bar" "foo .*"
+assert_failure 'assert_str_matches "foot" "foo$"'
+
+assert_end "string comparisons"
+
+
+# Running tests
+# -------------
+
+# Basic support
+assert './aserta -v assert_success true' '.'
+assert './aserta -v assert_success false' 'X'
+assert_success './aserta -x assert_success true'
+assert_failure './aserta -x assert_success false'
+
+# Rest of supported functions
+assert_success './aserta -x assert_failure false'
+assert_success './aserta -x assert_raises true 0'
+assert_success './aserta -x assert_raises false 1'
+
+assert_success './aserta -x assert "echo foo" "foo"'
+assert_success './aserta -x assert_contains "echo foobar" oba'
+assert_success './aserta -x assert_NOTcontains "echo foo" bar'
+assert_success './aserta -x assert_startswith "echo foobar" foo'
+assert_success './aserta -x assert_endswith "echo foobar" bar'
+assert_success './aserta -x assert_matches "echo foo" "^f..$"'
+
+assert_success './aserta -x assert_str_equals "foobar" "foobar"'
+assert_success './aserta -x assert_str_NOTequals foobar foo'
+assert_success './aserta -x assert_str_startswith foobar foo'
+assert_success './aserta -x assert_str_endswith foobar bar'
+assert_success './aserta -x assert_str_contains foobar ob'
+assert_success './aserta -x assert_str_NOTcontains foobar bo'
+assert_success './aserta -x assert_str_matches foobar "^f.+r$"'
+
+assert_end "running"
+
