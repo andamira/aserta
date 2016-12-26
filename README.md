@@ -97,16 +97,29 @@ $ echo $?
 
 ### Running [▴](#table-of-contents "Back to TOC")
 
-It is also possible to run tests without sourcing the script, just by
-passing the desired function as a script argument.
+It is possible to run tests without sourcing the script, just by
+passing the desired test function as an argument to the script, just
+after the script options, and after that the test function arguments. E.g.:
 
-The main disadvantage is that the functions `assert_end`, `skip` and
-`skip_if` are *not* supported in this way.
+```
+$ aserta --verbose assert_raises unknown-command 127
+.
+```
 
-First, make sure the script is executable: `chmod +x aserta`.
+This way of running tests has several disadvantages:
 
-Remember to provide the option -v (--verbose) and/or the option -x (--stop)
-to be able to see the result of the test, like this:
+- Not supported functions: `skip`, `skip_if` and `assert_end`.
+- Tests can only be run one at a time.
+- Can't show test suite summary statistics.
+
+To run a script without sourcing, first make sure the script is executable:
+
+```
+$ chmod +x aserta
+```
+
+And remember to at least provide the option -v (--verbose) or the option -x
+(--stop) to show the result of the test:
 
 ```
 $ ./aserta -v assert_success true

@@ -304,6 +304,7 @@ assert_end assert_matches
 # Tests expecting success
 assert_startswith "echo foo" "f"
 assert_startswith "echo foo" "foo"
+assert_startswith "echo this foo bar" "this"
 assert_startswith "echo foo; echo bar" "foo"
 
 # Tests expecting failure
@@ -333,6 +334,10 @@ assert_end assert_endswith
 # string comparisons tests
 # ------------------------
 
+textParagraph="this is the beginning
+of a long text, and
+this is the end"
+
 assert_str_equals "foo" "foo"
 assert_failure 'assert_str_equals "foot" "foo"'
 assert_failure 'assert_str_equals "foot" "oot"'
@@ -341,6 +346,7 @@ assert_failure 'assert_str_equals "foot" "o"'
 assert_str_NOTequals "foo" "bar"
 assert_str_NOTequals "foo" "FOO"
 assert_failure 'assert_str_NOTequals "foot" "foot"'
+assert_str_NOTequals "$textParagraph" "of a long text"
 
 assert_str_contains "foo" "foo"
 assert_str_contains "foobar" "foo"
@@ -348,17 +354,24 @@ assert_str_contains "foo bar" "oo b"
 assert_str_contains "foo bar" "bar"
 assert_str_contains "foo bar" "foo bar"
 assert_failure 'assert_str_contains "foot" "to"'
+assert_str_contains "$textParagraph" ", and
+this is" # newlines must be literal (\n doesn't work)
 
 assert_str_NOTcontains "foo" "of"
 assert_str_NOTcontains "foo bar" "oba"
 assert_failure 'assert_str_NOTcontains "foot" "oo"'
+assert_str_NOTcontains "$textParagraph" ", and this is"
 
 assert_str_startswith "foo" "f"
 assert_str_startswith "foo" "foo"
+assert_str_startswith "foo bar" "foo "
 assert_failure 'assert_str_startswith "foot" "t"'
+
+assert_str_startswith "$textParagraph" "this is the be"
 
 assert_str_endswith "foo" "oo"
 assert_str_endswith "foo" "foo"
+assert_str_endswith "$textParagraph" "is the end"
 assert_failure 'assert_str_endswith "foot" "f"'
 
 assert_str_matches "foo" "f.."
@@ -367,6 +380,7 @@ assert_str_matches "foo bar" "^foo bar$"
 assert_str_matches "foo bar" "[az ]+"
 assert_str_matches "foo bar" "foo .*"
 assert_failure 'assert_str_matches "foot" "foo$"'
+assert_str_matches "$textParagraph" "this [is]{2}"
 
 assert_end "string comparisons"
 
