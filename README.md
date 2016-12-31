@@ -14,8 +14,8 @@ a handy unit testing framework, in shell script; *originally forked from [assert
 
 - [Features](#features-)
 - [Examples](#examples-)
-  - [Sourcing](#sourcing-)
-  - [Running](#running-)
+  - [Sourcing the script](#sourcing-the-script-)
+  - [Running a single test](#running-a-single-test-)
 - [Install](#install-)
 - [Reference](#reference-)
   - [Functions](#functions-)
@@ -40,7 +40,7 @@ a handy unit testing framework, in shell script; *originally forked from [assert
 
 ## Examples [▴](#table-of-contents "Back to TOC")
 
-### Sourcing [▴](#table-of-contents "Back to TOC")
+### Sourcing the script [▴](#table-of-contents "Back to TOC")
 
 Write the following snippet into a new file named `my-tests`,
 in the same directory as the `aserta` script is located.
@@ -95,11 +95,11 @@ $ echo $?
 1
 ```
 
-### Running [▴](#table-of-contents "Back to TOC")
+### Running a single test [▴](#table-of-contents "Back to TOC")
 
-It is possible to run tests without sourcing the script, just by
-passing the desired test function as an argument to the script, just
-after the script options, and after that the test function arguments. E.g.:
+It is possible to run a single test without sourcing the script,
+just by passing the desired test function as an argument to the script
+just after the script options, and then the test function arguments. E.g.:
 
 ```
 $ aserta --verbose assert_raises unknown-command 127
@@ -108,18 +108,20 @@ $ aserta --verbose assert_raises unknown-command 127
 
 This way of running tests has several disadvantages:
 
-- Not supported functions: `skip`, `skip_if` and `assert_end`.
-- Tests can only be run one at a time.
+- Only one test can be run on each call.
 - Can't show test suite summary statistics.
+- Doesn't support: `skip`, `skip_if` and `assert_end`.
 
-To run a script without sourcing, first make sure the script is executable:
+To run a test function without sourcing the script,
+first make sure the script is executable:
 
 ```
 $ chmod +x aserta
 ```
 
-And remember to at least provide the option -v (--verbose) or the option -x
-(--stop) to show the result of the test:
+And remember to provide the option -v (--verbose) or the option -x
+(--stop) if you want to see the result of the test.
+Otherwise it wont have any effect.
 
 ```
 $ ./aserta -v assert_success true

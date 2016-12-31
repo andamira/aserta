@@ -86,7 +86,7 @@ parseArguments() {
 
 			*)  # error
 				if [[ "$OPTERR" != 1 || "${optspec:0:1}" == ":" ]]; then
-					printf "Non-option argument: '-%s'\n" "${OPTARG}" >&2
+					printf "Non-option argument: '-%s'\n" "$OPTARG" >&2
 					exit 255
 				fi ;;
 		esac
@@ -184,13 +184,9 @@ _cmd() {
 	gnu_cmd="g$default_cmd"
 	gnu_cmd_found=$(which "$gnu_cmd" 2> /dev/null)
 
-	if [ "$gnu_cmd_found" ]; then
+	if [[ "$gnu_cmd_found" ]]; then
 		printf '%s' "$gnu_cmd_found"
 	else
-		if [ "$(uname)" == 'Darwin' ]; then
-			printf "Warning: Cannot find gnu version of command '%s' (%s) on path." \
-				"Falling back to standard command" "$default_cmd" "$gnu_cmd" >&2
-		fi
 		printf '%s' "$default_cmd"
 	fi
 
