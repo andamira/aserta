@@ -5,7 +5,7 @@
 #   repository : http://github.com/andamira/aserta
 #       author : José Luis Cruz © 2016-2017
 #                Robert Lehmann © 2009-2015 (assert.sh)
-#      license : LGPLv3
+#      license : MIT & LGPLv3
 _ASERTA_VERSION=2.2.1
 
 
