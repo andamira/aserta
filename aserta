@@ -6,7 +6,7 @@
 #       author : José Luis Cruz © 2016-2017
 #                Robert Lehmann © 2009-2015 (assert.sh)
 #      license : LGPLv3
-_ASERTA_VERSION=2.2.0
+_ASERTA_VERSION=2.2.1
 
 
 #-------------------------------------------------------------------------------
@@ -22,8 +22,8 @@ main() {
 	export CONTINUE="${CONTINUE:-}"
 
 	# Commands substitutions
-	declare -g __GREP=$(__gnuCmd grep)
-	declare -g __DATE=$(__gnuCmd date)
+	export __GREP=$(__gnuCmd grep)
+	export __DATE=$(__gnuCmd date)
 
 	_assert_reset
 	: "${tests_suite_status:=0}"  # remember if any of the tests failed so far
