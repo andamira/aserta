@@ -1,6 +1,6 @@
 # aserta
 
-a handy unit testing framework, in shell script; *originally forked from [assert.sh](https://github.com/lehmannro/assert.sh)*
+a handy unit testing framework; *originally forked from [assert.sh](https://github.com/lehmannro/assert.sh)*
 
 [![language: bash](https://img.shields.io/badge/language-bash-447799.svg?style=flat-square "made in Bash")]()
 [![version: stable](https://img.shields.io/github/tag/andamira/aserta.svg?label=stable+version&style=flat-square "stable version")](https://github.com/andamira/aserta/commits/stable)
@@ -14,9 +14,10 @@ a handy unit testing framework, in shell script; *originally forked from [assert
 
 - [Features](#features-)
 - [Examples](#examples-)
-  - [Sourcing](#sourcing-)
-  - [Running](#running-)
+  - [Sourcing the script](#sourcing-the-script-)
+  - [Running a single test](#running-a-single-test-)
 - [Install](#install-)
+  - [Mac OS X](#mac-os-x-)
 - [Reference](#reference-)
   - [Functions](#functions-)
     - [Return Status](#return-status-)
@@ -24,11 +25,12 @@ a handy unit testing framework, in shell script; *originally forked from [assert
     - [String comparison](#string-comparison-)
     - [Flow Control](#flow-control-)
   - [Options](#options-)
+- [License](#license-)
 
 ---
 
 
-## Features [▴](#table-of-contents "Back to TOC")
+## Features [△](#table-of-contents "Back to TOC")
 
 - minimal setup & lightweight interface
 - time benchmarks with real-time display of test progress
@@ -38,9 +40,9 @@ a handy unit testing framework, in shell script; *originally forked from [assert
 - skip individual tests
 
 
-## Examples [▴](#table-of-contents "Back to TOC")
+## Examples [△](#table-of-contents "Back to TOC")
 
-### Sourcing [▴](#table-of-contents "Back to TOC")
+### Sourcing the script [△](#table-of-contents "Back to TOC")
 
 Write the following snippet into a new file named `my-tests`,
 in the same directory as the `aserta` script is located.
@@ -95,11 +97,11 @@ $ echo $?
 1
 ```
 
-### Running [▴](#table-of-contents "Back to TOC")
+### Running a single test [△](#table-of-contents "Back to TOC")
 
-It is possible to run tests without sourcing the script, just by
-passing the desired test function as an argument to the script, just
-after the script options, and after that the test function arguments. E.g.:
+It is possible to run a single test without sourcing the script,
+just by passing the desired test function as an argument to the script
+just after the script options, and then the test function arguments. E.g.:
 
 ```
 $ aserta --verbose assert_raises unknown-command 127
@@ -108,18 +110,20 @@ $ aserta --verbose assert_raises unknown-command 127
 
 This way of running tests has several disadvantages:
 
-- Not supported functions: `skip`, `skip_if` and `assert_end`.
-- Tests can only be run one at a time.
+- Only one test can be run on each call.
 - Can't show test suite summary statistics.
+- Doesn't support: `skip`, `skip_if` and `assert_end`.
 
-To run a script without sourcing, first make sure the script is executable:
+To run a test function without sourcing the script,
+first make sure the script is executable:
 
 ```
 $ chmod +x aserta
 ```
 
-And remember to at least provide the option -v (--verbose) or the option -x
-(--stop) to show the result of the test:
+And remember to provide the option -v (--verbose) or the option -x
+(--stop) if you want to see the result of the test.
+Otherwise it wont have any effect.
 
 ```
 $ ./aserta -v assert_success true
@@ -138,12 +142,20 @@ test #1 "false" failed:
 ```
 
 
-## Install [▴](#table-of-contents "Back to TOC")
+## Install [△](#table-of-contents "Back to TOC")
 
 - Manually
 
+  The latest stable version:
+
   ```sh
-  $ wget https://raw.github.com/andamira/aserta/master/aserta && chmod +x aserta
+  $ wget git.io/aserta.stable && chmod +x aserta
+  ```
+
+  The bleeding edge version (`master`):
+
+  ```sh
+  $ wget git.io/aserta && chmod +x aserta
   ```
 
 - With [bpkg](http://www.bpkg.io/)
@@ -158,14 +170,29 @@ test #1 "false" failed:
   $ basher install andamira/aserta
   ```
 
+### Mac OS X [△](#table-of-contents "Back to TOC")
 
-## Reference [▴](#table-of-contents "Back to TOC")
+The script should work as it is in a Mac OS X system.
+
+But it is encouraged to install the GNU version of coreutils and grep
+in order to achieve greater speeds in tests with regular expressions,
+and to be able to measure time in milliseconds, instead of full seconds.
+
+A very easy way to install them is by using [Brew](http://brew.sh/):
+
+```
+$ brew tap homebrew/dupes
+$ brew install coreutils grep
+```
 
 
-### Functions [▴](#table-of-contents "Back to TOC")
+## Reference [△](#table-of-contents "Back to TOC")
 
 
-#### Return Status [▴](#table-of-contents "Back to TOC")
+### Functions [△](#table-of-contents "Back to TOC")
+
+
+#### Return Status [△](#table-of-contents "Back to TOC")
 
 - **`assert_raises`** `<command> [exitcode] [STDIN]`
 
@@ -182,7 +209,7 @@ test #1 "false" failed:
   Verify the command terminated in failure.
 
 
-#### Expected Output [▴](#table-of-contents "Back to TOC")
+#### Expected Output [△](#table-of-contents "Back to TOC")
 
 - **`assert`** `<command> [STDOUT] [STDIN]`
 
@@ -213,7 +240,7 @@ test #1 "false" failed:
   Verify the command output *matches* the extended REGEXP pattern.
 
 
-#### String Comparison [▴](#table-of-contents "Back to TOC")
+#### String Comparison [△](#table-of-contents "Back to TOC")
 
 - **`assert_str_equals`** `<string> <expected string>`
 
@@ -244,7 +271,7 @@ test #1 "false" failed:
   Verify the first string *matches* the extended REGEXP pattern.
 
 
-#### Flow Control [▴](#table-of-contents "Back to TOC")
+#### Flow Control [△](#table-of-contents "Back to TOC")
 
 - **`assert_end`** `[suite]`
 
@@ -265,8 +292,7 @@ test #1 "false" failed:
   E.g. if the test needs root privileges or network access.
 
 
-
-### Options [▴](#table-of-contents "Back to TOC")
+### Options [△](#table-of-contents "Back to TOC")
 
 See `aserta --help` for command line options on test runners.
 
@@ -277,4 +303,13 @@ command line option |   ENV variable  | description
 `-i`, `--invariant` | `$INVARIANT`    | Don't measure runtime. Useful for parsing output.
 `-v`, `--verbose`   | `$DEBUG`        | Real-time output for every individual test.
 `-x`, `--stop`      | `$STOP`         | Stop running tests after the first failure.
+
+
+### License [△](#table-of-contents "Back to TOC")
+
+- The work previous to the fork of `assert.sh` was released under the LGPLv3 license.
+  - View [COPYING](https://github.com/andamira/aserta/blob/master/COPYING)
+   and [COPYING.LESSER](https://github.com/andamira/aserta/blob/master/COPYING.LESSER)
+- The new work in the current project `aserta`, is released under the MIT license.
+  - View [LICENSE.md](https://github.com/andamira/aserta/blob/master/LICENSE.md)
 

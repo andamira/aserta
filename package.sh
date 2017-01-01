@@ -1,1 +1,1 @@
-BINS=assert.sh
+BINS=aserta

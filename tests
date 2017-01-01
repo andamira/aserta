@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source aserta
+# shellcheck disable=SC1091
+source ./aserta
 
 _clean() {
     _assert_reset # reset state
@@ -131,6 +132,14 @@ assert_raises "_clean; shopt -s extdebug; skip; assert_raises false; shopt extde
 assert_end interaction
 
 
+# TODO: arguments
+# --------------
+
+# short arguments
+
+# long arguments
+
+
 # "Regression" tests
 # -------------------
 
@@ -176,30 +185,11 @@ test #1 "false" failed:
 assert "_clean; set -u; assert_raises true; assert true; assert_end" \
 "all 2 tests passed."
 
-# issue 3: Not working on Mac OS X 10.7.5
-assert "
-_date=20;
-date() {
-echo \${_date}N;
-};
-_clean INVARIANT=;
-assert date 20N;
-_date=22;
-assert_end" "all 1 tests passed in 2.000s."
-
 # commit: supported formatting codes
 assert "echo %s" "%s"
 
 # We trim the output from wc as the BSD version (on Mac OS) contains leading spaces
 assert "echo -n %s | wc -c | tr -d '[[:space:]]'" "2"
-
-# date mock, with no nanosecond support
-date() {
-    echo "123N"
-}
-assert '_clean DEBUG=1 INVARIANT=; tests_starttime="0N"; assert_end' \
-       '\nall 0 tests passed in 123.000s.'
-unset -f date  # bring back original date
 
 # commit: Supporting multiline inputs
 # trim the output from wc as the BSD version (on Mac OS) has leading spaces
