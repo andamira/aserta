@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
 #
-# aserta
-# a handy unit testing framework
-#
-# Version    : 2.1.1
-# Repository : http://github.com/andamira/aserta
-# Authors    :
-#   - Robert Lehmann © 2009-2015
-#   - José Luis Cruz © 2016
-# License    : LGPLv3
+#         name : aserta
+#  description : a handy unit testing framework
+#   repository : http://github.com/andamira/aserta
+#       author : José Luis Cruz © 2016-2017
+#                Robert Lehmann © 2009-2015 (assert.sh)
+#      license : LGPLv3
+_ASERTA_VERSION=2.2.0
 
 
 #-------------------------------------------------------------------------------
 # main
 #
+# shellcheck disable=SC2155
 main() {
 
 	export DISCOVERONLY="${DISCOVERONLY:-}"
@@ -21,6 +20,10 @@ main() {
 	export STOP="${STOP:-}"
 	export INVARIANT="${INVARIANT:-}"
 	export CONTINUE="${CONTINUE:-}"
+
+	# Commands substitutions
+	declare -g __GREP=$(__gnuCmd grep)
+	declare -g __DATE=$(__gnuCmd date)
 
 	_assert_reset
 	: "${tests_suite_status:=0}"  # remember if any of the tests failed so far
@@ -30,9 +33,6 @@ main() {
 	trap _assert_cleanup EXIT
 
 	_indent=$'\n\t' # local format helper
-
-	# Commands substitutions
-	GREP=$(_cmd grep)
 
 	parseArguments "$@"
 
@@ -51,7 +51,12 @@ parseArguments() {
 	local OPTIND option function
 	local optspec=":cdivxh-:"
 
-	# First parse the options
+	# Show usage and exit if:
+	# - the script has not been sourced
+	# - no arguments has been passed
+	[[ "$0" == "${BASH_SOURCE[0]}" && -z "$@" ]] && usage && exit 0
+
+	# Parse the options
 
 	while getopts "$optspec" option; do
 		case "$option" in
@@ -61,12 +66,14 @@ parseArguments() {
 
 			-)
 				case "$OPTARG" in
-					continue)  CONTINUE=1     ;;
-					discover)  DISCOVERONLY=1 ;;
-					invariant) INVARIANT=1    ;;
-					verbose)   DEBUG=1        ;;
-					stop)      STOP=1         ;;
-					help) usage true; exit 0  ;;
+					continue)  CONTINUE=1      ;;
+					discover)  DISCOVERONLY=1  ;;
+					invariant) INVARIANT=1     ;;
+					verbose)   DEBUG=1         ;;
+					stop)      STOP=1          ;;
+
+					help)      usage ; exit 0  ;;
+					version)   version; exit 0 ;;
 
 					*)  # error
 						if [[ "$OPTERR" == 1 ]]; then
@@ -82,6 +89,7 @@ parseArguments() {
 			i) INVARIANT=1    ;;
 			v) DEBUG=1        ;;
 			x) STOP=1         ;;
+
 			h) usage false; exit 0 ;;
 
 			*)  # error
@@ -93,7 +101,9 @@ parseArguments() {
 	done
 	shift $((OPTIND-1))
 
-	# Secondly, parse an optional test function
+
+
+	# Finally parse an optional test function
 
 	function="$1"; shift
 	case "$function" in
@@ -124,7 +134,7 @@ parseArguments() {
 		assert_end|skip|skip_if)
 			printf "Test function '%s' not supported as a script argument\n" \
 				"$function"
-			exit 255 ;;
+			exit 254 ;;
 
 		'') ;; # no function
 
@@ -141,56 +151,70 @@ parseArguments() {
 #
 #   Print usage information
 #
-# Arguments:
-#  $1 - if true, print long usage
-#
 usage() {
-	local long="$1"
 
-	if [[ "$long" == true ]]; then
+	cat <<- ENDUSAGE
+	Usage: $(basename "$0") [options] [assert_function] [arguments]
 
-		cat <<- "EOF"
-		Usage: $0 [options] [assert_function] [arguments]
+	> a handy unit testing framework <
 
-		Language-agnostic unit tests for subprocesses.
+	OPTION FLAGS
 
-		Options:
-		  -v, --verbose    generate output for every individual test case
-		  -x, --stop       stop running tests after the first failure
-		  -i, --invariant  do not measure timings to remain invariant between runs
-		  -d, --discover   collect test suites only, do not run any tests
-		  -c, --continue   do not modify exit code to test suite status
-		  -h               show brief usage information and exit
-		  --help           show this help message and exit
-		EOF
-	else
-		printf '%s [-vxidc] [assert_function] [args]\n' "$0"
-		printf "%s [-h] [--help]\n" "$(sed 's/./ /g' <<< "$0")"
-	fi
+	  -v, --verbose    generate output for every individual test case
+	  -x, --stop       stop running tests after the first failure
+	  -i, --invariant  do not measure timings to remain invariant between runs
+	  -d, --discover   collect test suites only, do not run any tests
+	  -c, --continue   do not modify exit code to test suite status
+
+	  -h, --help       display this help and exit
+	      --version    show version info and exit
+	ENDUSAGE
 
 } # usage()
 
 
 #-------------------------------------------------------------------------------
-# _cmd <command>
+# version
 #
-#   Returns the resolved command, preferring gnu-versions on non-Linux systems,
-#   such as Mac OS, and falling back to the standard version when not found.
+#   Print version information
 #
-_cmd() {
-	declare default_cmd gnu_cmd gnu_cmd_found
+version() {
 
-	default_cmd="$1"
-	gnu_cmd="g$default_cmd"
-	gnu_cmd_found=$(which "$gnu_cmd" 2> /dev/null)
+	cat <<- ENDVERSION
+	aserta v$_ASERTA_VERSION
 
-	if [[ "$gnu_cmd_found" ]]; then
-		printf '%s' "$gnu_cmd_found"
+	<https://github.com/andamira/aserta>
+
+	Copyright (C) 2016-2017 José Luis Cruz
+	  Released under the MIT license.
+	Copyright (C) 2009-2015 Robert Lehmann
+	  Released under the LGPLv3 license
+
+	Dependencies found:
+	  $__GREP, $__DATE
+
+	ENDVERSION
+
+} #version()
+
+
+#-------------------------------------------------------------------------------
+# __gnuCmd
+#
+#   Returns the resolved command, preferring the GNU versions
+#   and falling back to the standard version when not found.
+#
+__gnuCmd() {
+	local default_cmd="$1"
+	local gnu_cmd="g$default_cmd"
+
+	if [[ "$(which "$gnu_cmd" 2> /dev/null)" ]]; then
+		printf '%s' "$gnu_cmd"
 	else
 		printf '%s' "$default_cmd"
 	fi
 
-} # _cmd()
+} #__gnuCmd()
 
 
 #-------------------------------------------------------------------------------
@@ -232,7 +256,7 @@ _assert_reset() {
 	tests_ran=0
 	tests_failed=0
 	tests_errors=()
-	tests_starttime="$(date +%s%N)" # nanoseconds_since_epoch
+	tests_starttime="$($__DATE +%s%N)" # nanoseconds_since_epoch
 
 } # _assert_reset()
 
@@ -247,7 +271,7 @@ _assert_with_grep() {
 	local string="$2"
 	local pattern="$3"
 
-	assert_success "printf '$string' | $GREP $modifier '$pattern'" || return 1
+	assert_success "printf '$string' | $__GREP $modifier '$pattern'" || return 1
 
 } # _assert_with_grep()
 
@@ -311,7 +335,7 @@ _skip() {
 # assert_end [suite ..]
 #
 assert_end() {
-	tests_endtime="$(date +%s%N)"
+	tests_endtime="$($__DATE +%s%N)"
 
 	# required visible decimal place for seconds (leading zeros if needed)
 	local tests_time; tests_time="$( printf "%010d" \

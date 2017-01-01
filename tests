@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source aserta
+# shellcheck disable=SC1091
+source ./aserta
 
 _clean() {
     _assert_reset # reset state
