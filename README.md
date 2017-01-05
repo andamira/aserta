@@ -30,7 +30,7 @@ a handy unit testing framework; *originally forked from [assert.sh](https://gith
 ---
 
 
-## Features [△](#table-of-contents "Back to TOC")
+## Features [↑](#table-of-contents "Back to TOC")
 
 - minimal setup & lightweight interface
 - time benchmarks with real-time display of test progress
@@ -40,9 +40,9 @@ a handy unit testing framework; *originally forked from [assert.sh](https://gith
 - skip individual tests
 
 
-## Examples [△](#table-of-contents "Back to TOC")
+## Examples [↑](#table-of-contents "Back to TOC")
 
-### Sourcing the script [△](#table-of-contents "Back to TOC")
+### Sourcing the script [↑](#table-of-contents "Back to TOC")
 
 Write the following snippet into a new file named `my-tests`,
 in the same directory as the `aserta` script is located.
@@ -97,7 +97,7 @@ $ echo $?
 1
 ```
 
-### Running a single test [△](#table-of-contents "Back to TOC")
+### Running a single test [↑](#table-of-contents "Back to TOC")
 
 It is possible to run a single test without sourcing the script,
 just by passing the desired test function as an argument to the script
@@ -142,7 +142,7 @@ test #1 "false" failed:
 ```
 
 
-## Install [△](#table-of-contents "Back to TOC")
+## Install [↑](#table-of-contents "Back to TOC")
 
 - Manually
 
@@ -170,7 +170,7 @@ test #1 "false" failed:
   $ basher install andamira/aserta
   ```
 
-### Mac OS X [△](#table-of-contents "Back to TOC")
+### Mac OS X [↑](#table-of-contents "Back to TOC")
 
 The script should work as it is in a Mac OS X system.
 
@@ -186,13 +186,13 @@ $ brew install coreutils grep
 ```
 
 
-## Reference [△](#table-of-contents "Back to TOC")
+## Reference [↑](#table-of-contents "Back to TOC")
 
 
-### Functions [△](#table-of-contents "Back to TOC")
+### Functions [↑](#table-of-contents "Back to TOC")
 
 
-#### Return Status [△](#table-of-contents "Back to TOC")
+#### Return Status [↑](#table-of-contents "Back to TOC")
 
 - **`assert_raises`** `<command> [exitcode] [STDIN]`
 
@@ -209,7 +209,7 @@ $ brew install coreutils grep
   Verify the command terminated in failure.
 
 
-#### Expected Output [△](#table-of-contents "Back to TOC")
+#### Expected Output [↑](#table-of-contents "Back to TOC")
 
 - **`assert`** `<command> [STDOUT] [STDIN]`
 
@@ -240,7 +240,7 @@ $ brew install coreutils grep
   Verify the command output *matches* the extended REGEXP pattern.
 
 
-#### String Comparison [△](#table-of-contents "Back to TOC")
+#### String Comparison [↑](#table-of-contents "Back to TOC")
 
 - **`assert_str_equals`** `<string> <expected string>`
 
@@ -271,7 +271,7 @@ $ brew install coreutils grep
   Verify the first string *matches* the extended REGEXP pattern.
 
 
-#### Flow Control [△](#table-of-contents "Back to TOC")
+#### Flow Control [↑](#table-of-contents "Back to TOC")
 
 - **`assert_end`** `[suite]`
 
@@ -292,7 +292,7 @@ $ brew install coreutils grep
   E.g. if the test needs root privileges or network access.
 
 
-### Options [△](#table-of-contents "Back to TOC")
+### Options [↑](#table-of-contents "Back to TOC")
 
 See `aserta --help` for command line options on test runners.
 
@@ -305,7 +305,7 @@ command line option |   ENV variable  | description
 `-x`, `--stop`      | `$STOP`         | Stop running tests after the first failure.
 
 
-### License [△](#table-of-contents "Back to TOC")
+### License [↑](#table-of-contents "Back to TOC")
 
 - The work previous to the fork of `assert.sh` was released under the LGPLv3 license.
   - View [COPYING](https://github.com/andamira/aserta/blob/master/COPYING)
