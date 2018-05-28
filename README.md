@@ -149,7 +149,7 @@ test #1 "false" failed:
   The latest stable version:
 
   ```sh
-  $ wget git.io/aserta.stable && chmod +x aserta
+  $ wget git.io/aserta.stable -O aserta && chmod +x aserta
   ```
 
   The bleeding edge version (`master`):
